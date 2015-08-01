@@ -1,0 +1,34 @@
+ 0 - Julii
+ 1 - Brutii
+ 2 - Scipii
+ 3 - Senate
+ 4 - Macedonia
+ 5 - Egypt
+ 6 - Seleucids
+ 7 - Carthage
+ 8 - Parthia
+ 9 - Pontus
+10 - Gauls
+11 - Germania
+12 - Britons
+13 - Armenia
+14 - Dacia
+15 - Greeks
+16 - Numidia
+17 - Scythii
+18 - Spain
+19 - Thrace
+20 - Rebels
+
+414 452 - Seleucid Data start
+454 355 - Seleucid Units start
+617 261 - Brutii Data start
+
+Romans (4) - generals guard
+Macedon, Seleucid, Greeks - greek general's guard
+Egypt - general's bodyguard
+Carthage, Numidia, Spain - general's cavalry
+Parthia, Pontus, Armenia - generals cavalry
+Gaul, Germania, Dacia, Scythia - barb chieftain cavalry
+Britons - barb british general
+Thrace - thracian bodyguard
