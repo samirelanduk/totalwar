@@ -20,5 +20,6 @@ def oneToFour(i):
     s = ("0" * (32 - len(bin(i)[2:]))) + bin(i)[2:]
     return [int(x, 2) for x in [s[:8], s[8:16], s[16:24], s[24:32]]][::-1]
 
+import rs
 from rs import RomeSave
 sav = RomeSave(data)

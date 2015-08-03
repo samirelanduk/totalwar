@@ -1,13 +1,12 @@
-"""A RomeSave object is the representation of a Rome Total War .sav file"""
-
 import math
 import os
 from .locations import City, MercenaryRegion
 from .military import Army
 from .core import *
 
-class RomeSave:
 
+class RomeSave:
+    """Representation of a Rome: Total War .sav file"""
     def __init__(self, bytestring):
         #Assign the incoming bytestring to the object - this is temporary for testing
         self.bytestring = bytestring
@@ -21,55 +20,27 @@ class RomeSave:
         for section in self.sections:
             section.index = self.sections.index(section)
 
+        #Identify known sections
+        self.sections_dict = {}
+        self.find_sections()
+
+        #Get year information
+        year_section = self.sections[self.sections_dict["year-s"]].bytestring
+        self.turn_no = fourToOne(year_section[5:9])
+
+        #Get cities
+        cities_sections = [self.sections[x] for x in self.sections_dict["cities-s"]]
+        city_starts = [cities_sections.index(x) + 2 for x in cities_sections[:-2] if len(x.bytestring) == 4]
+        self.cities = breakIntoSections(cities_sections, city_starts)
+
 
         #Get RTW file information
-        #os.chdir(__file__[:0-__file__[::-1].find("\\")])
-        #f = open("export_descr_buildings.txt")
-        #lines = [x for x in f.readlines() if len(x) > 0 and x[0] != ";"]
-        #f.close()
-        #building_starts = [lines.index(x) for x in lines if x[:8] == "building"]
-        #self.export_descr_buildings = [edbBuilding(lines[x:building_starts[building_starts.index(x)+1]]) for x in building_starts[:-1]]
-        #self.export_descr_buildings.append(edbBuilding(lines[building_starts[-1]:]))
-
         #f = open("export_descr_unit.txt")
         #lines = [x for x in f.readlines() if  len(x.rstrip()) > 0 and x[0] != ";"]
         #f.close()
         #unit_starts = [lines.index(x) for x in lines if x[:4] == "type"]
         #self.export_descr_unit = [eduUnit(lines[x:unit_starts[unit_starts.index(x)+1]]) for x in unit_starts[:-1]]
         #self.export_descr_unit.append(eduUnit(lines[unit_starts[-1]:]))
-
-
-        #Determine the ingame times
-        #NEED TO CHECK THIS STILL WORKS FOR AD YEARS
-        #self.turn_no = fourToOne(self.sections[3][5:9])
-        #year = -270.5 + (self.turn_no / 2.0)
-        #self.year = math.trunc(year)
-        #self.season = "W" if self.turn_no % 2 else "S"
-
-        #Assign the cities
-        #self.cities = []
-        #cities_start = 0
-        #for section in self.sections:
-        #    if b"default" in section:
-        #        cities_start = self.sections.index(section) + 1
-        #        break
-        #cities_end = 0
-        #for section in self.sections[cities_start:]:
-    #        if b"Eastern_Europe" in section:
-        #        cities_end = self.sections.index(section) + 1
-        #        break
-        #cities_sections = self.sections[cities_start:cities_end]
-        #current_city = []
-        #on_last = False
-        #for section in cities_sections:
-        #    current_city.append(section)
-        #    if on_last:
-        #        self.cities.append(locations.City(current_city, self.export_descr_buildings))
-        #        current_city = []
-        #    if len(section) == 4:
-        #        on_last = True
-        #    else:
-        #        on_last = False
 #
         #Get global information from all cities
         #self.civilian_population = sum([x.population for x in self.cities])
@@ -133,6 +104,24 @@ class RomeSave:
 #    army_sections = [x for x in army_sections if army_sections.index(x) not in brokens]
 #    return army_sections
 
+    def find_sections(self):
+        """Allocates values sections_dict by looking through all sections"""
+        self.sections_dict["year-s"] = 3
+
+        #Cities
+        cities_start = 0
+        for section in self.sections:
+            if b"default" in section.bytestring:
+                cities_start = self.sections.index(section) + 1
+                break
+        cities_end = 0
+        for section in self.sections[cities_start:]:
+            if b"Eastern_Europe" in section.bytestring:
+                cities_end = self.sections.index(section) + 1
+                break
+        self.sections_dict["cities-s"] = list(range(cities_start, cities_end))
+
+
 class Section:
 
     def __init__(self, bytestring, first=False):
@@ -144,7 +133,6 @@ class Section:
         return str(self.offset) + ": " + str(list(self.contents))
 
 
-###export_descr_buildings classes
 class edbBuilding:
 
     def __init__(self, lines):
@@ -194,6 +182,8 @@ class eduUnit:
             self.dictionary[key] = value
         self.multiplier = 4 #HARD CODED - FIX!
 
+
+
 def watch_saves(rtw_dir=r"C:\Program Files (x86)\Steam\steamapps\common\Rome Total War Gold\saves", new_saves=r"C:\Users\Sam\OneDrive\7) Computing\Programming\Python projects\6 -TW\Saves 2"):
     import datetime
     import time
@@ -218,12 +208,39 @@ def watch_saves(rtw_dir=r"C:\Program Files (x86)\Steam\steamapps\common\Rome Tot
         print("Checking again")
 
 def load_saves(directory = r"C:\Users\Sam\OneDrive\7) Computing\Programming\Python projects\6 -TW\Saves 2"):
+    import matplotlib.pyplot as plt
+
     big = []
-    for sav in [x for x in os.listdir(directory) if ".sav" in x]:
+    savs = [x for x in os.listdir(directory) if ".sav" in x]
+    for sav in savs[:2]:
         print(sav)
         f = open(directory + "\\" + sav, "rb")
         big.append(RomeSave(f.read()))
         f.close()
         print("")
 
+    sections_per_file = plt.figure()
+    sections_per_file.add_subplot(111)
+    file_no = [str(big.index(x) + 1) for x in big]
+    section_no = [len(x.sections) for x in big]
+    sections_per_file.axes[0].bar(file_no, section_no)
+    sections_per_file.axes[0].axis([0,3,0,3000])
+    sections_per_file.show()
+
+
+
     return big
+
+
+
+
+
+#Get global representations of export_descr_unit and export_descr_buildings
+my_dir = __file__[:0-__file__[::-1].find("\\")]
+f = open(my_dir + "export_descr_buildings.txt")
+lines = [x for x in f.readlines() if len(x) > 0 and x[0] != ";"]
+while lines[0][:8] != "building":
+    lines = lines[1:]
+f.close()
+building_starts = [lines.index(x) for x in lines if x[:8] == "building"]
+export_descr_buildings = [edbBuilding(x) for x in breakIntoSections(lines, building_starts)]
