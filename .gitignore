@@ -1,6 +1,9 @@
 OLD
-test.py
 totalwar/__pycache__
+totalwar/rome/__pycache__
+totalwar/rome/*.pyc
 Docs
 Saves 3
 Saves
+watch_saves.py
+test.py
