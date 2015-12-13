@@ -6,6 +6,11 @@ import os
 
 RTW_SAVE_LOCATION = None
 
+def load_save(contents):
+    f = SaveFile(contents)
+    return f
+    
+
 def watch_saves(export_directory, period=60, save_names=["Autosave"]):
     """Watch a save file for changes, and make a copy when it does change."""
 
