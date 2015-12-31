@@ -1,3 +1,94 @@
+import sys
+sys.path = ["/Users/sam/Dropbox/PROJECTS/quickplots"] + sys.path
+import quickplots
+import math
+
+class BytestringContainer:
+    """Any object which contains a bytestring."""
+
+    def __init__(self, bytestring):
+        self.bytestring = bytestring
+
+
+    def __len__(self):
+        return len(self.bytestring)
+
+
+    def __getitem__(self, key):
+        return self.bytestring[key]
+
+
+    def __contains__(self, key):
+        return key in self.bytestring
+
+
+    def as_list(self):
+        return list(self.bytestring)
+
+
+    def as_string(self):
+        chars = [chr(b) if chr(b).isalpha() and b < 128 else "." if b else " "
+         for b in self.bytestring]
+        return "".join(chars)
+
+
+    def get_byte_trend_chart(self, byte=0):
+        chart = quickplots.SingleSeriesAxisChart(
+         [(i, (b == byte)) for i,b in enumerate(self.bytestring, start=1)]
+        ).generate_moving_average(
+         n = math.ceil(len(self.bytestring) / 50)
+        )
+        chart.width = 1
+        return chart
+
+
+
+class RecordContainer(BytestringContainer):
+    """Any object which contains a list of records."""
+
+    color = "#999999"
+
+    def __init__(self, records):
+        self.records = records
+        byteslist = []
+        for record in self.records:
+            byteslist += record.as_list()
+        BytestringContainer.__init__(self, bytes(byteslist))
+
+
+    def __len__(self):
+        return len(self.records)
+
+
+    def __getitem__(self, key):
+        return self.records[key]
+
+
+    def __contains__(self, key):
+        return key in self.records
+
+
+    def get_records_chart(self, log=None, start=None, end=None):
+        data = [(r.number, len(r.bytestring)) for r in self[start:end]]
+        if log:
+            data = [(d[0], math.log(d[1])) for d in data]
+        edge_width = 1 if len(data) < 100 else 0
+        bar_width = 0.8 if len(data) < 100 else 1
+        chart = quickplots.BarChart(data,
+         edge_width=edge_width, bar_width=bar_width, color=self.color,
+          x_limit=[data[0][0]-0.5, data[-1][0]+0.5], x_label="Record number",
+           x_ticks=[data[0][0], data[-1][0]],title="Record lengths in save file")
+        return chart
+
+
+    def get_record_by_number(self, number):
+        for record in self:
+            if record.number == number:
+                return record
+
+
+
+
 def four_to_one(*the_bytes):
     """Takes four bytes and returns a 32 bit integer."""
 

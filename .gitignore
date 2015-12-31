@@ -3,10 +3,11 @@ totalwar/__pycache__
 totalwar/rome/__pycache__
 totalwar/rome/*.pyc
 totalwar/rome/data.py
-totalwar/rome/structure.py
 Docs
 Saves 3
 Saves
 watch_saves.py
 test.py
 .DS_Store
+*.p
+big.py

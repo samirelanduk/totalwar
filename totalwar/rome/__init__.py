@@ -1,4 +1,5 @@
 from .file import *
+from .structure import *
 import datetime
 import time
 import shutil
@@ -8,7 +9,8 @@ RTW_SAVE_LOCATION = None
 
 def load_save(contents):
     f = SaveFile(contents)
-    return f
+    s = StructuredSaveFile(f)
+    return s
 
 
 def watch_saves(export_directory, period=60, save_names=["Autosave"]):
