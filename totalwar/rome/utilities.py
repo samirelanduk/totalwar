@@ -32,6 +32,15 @@ class BytestringContainer:
         return "".join(chars)
 
 
+    def compare(self, other):
+        if len(other) != len(self):
+            print("Lengths do not match.")
+        else:
+            for i, pair in enumerate(zip(self, other), start=1):
+                if pair[0] != pair[1]:
+                    print("%i: %i, %i" % (i, pair[0], pair[1]))
+
+
     def get_byte_trend_chart(self, byte=0):
         chart = quickplots.SingleSeriesAxisChart(
          [(i, (b == byte)) for i,b in enumerate(self.bytestring, start=1)]
@@ -77,7 +86,8 @@ class RecordContainer(BytestringContainer):
         chart = quickplots.BarChart(data,
          edge_width=edge_width, bar_width=bar_width, color=self.color,
           x_limit=[data[0][0]-0.5, data[-1][0]+0.5], x_label="Record number",
-           x_ticks=[data[0][0], data[-1][0]],title="Record lengths in save file")
+           x_ticks=[data[0][0], data[-1][0]], xgrid = False,
+            title="Record lengths in save file")
         return chart
 
 

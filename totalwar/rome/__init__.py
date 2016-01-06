@@ -1,5 +1,7 @@
 from .file import *
 from .structure import *
+from .savegame import *
+from .lookup import *
 import datetime
 import time
 import shutil
@@ -9,7 +11,8 @@ RTW_SAVE_LOCATION = None
 
 def load_save(contents):
     f = SaveFile(contents)
-    s = StructuredSaveFile(f)
+    t = StructuredSaveFile(f)
+    s = SaveGame(t)
     return s
 
 

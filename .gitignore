@@ -2,7 +2,6 @@ OLD
 totalwar/__pycache__
 totalwar/rome/__pycache__
 totalwar/rome/*.pyc
-totalwar/rome/data.py
 Docs
 Saves 3
 Saves
@@ -11,3 +10,4 @@ test.py
 .DS_Store
 *.p
 big.py
+named.py
