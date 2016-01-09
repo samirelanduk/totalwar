@@ -2,6 +2,7 @@ import sys
 sys.path = ["/Users/sam/Dropbox/PROJECTS/quickplots"] + sys.path
 import quickplots
 import math
+from collections import Counter
 
 class BytestringContainer:
     """Any object which contains a bytestring."""
@@ -39,6 +40,19 @@ class BytestringContainer:
             for i, pair in enumerate(zip(self, other), start=1):
                 if pair[0] != pair[1]:
                     print("%i: %i, %i" % (i, pair[0], pair[1]))
+
+
+    def rank_subbytes(self, length=4):
+        subbytes = []
+        for frame in range(length):
+            for start, _ in enumerate(self.bytestring[frame:]):
+                try:
+                    subbytes.append(self.bytestring[frame:][start: start + 4])
+                    #print(subbytes[-1])
+                except IndexError:
+                    pass
+        subbytes = [s for s in subbytes if len(s) == 4]
+        return Counter(subbytes)
 
 
     def get_byte_trend_chart(self, byte=0):
