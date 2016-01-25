@@ -7,6 +7,7 @@ class DataSaveFile:
         self.structured_save_file = structured_save_file
 
         self.starter_section = DataStarterSection(self.structured_save_file.starter_section)
+        self.cities_section = DataCitiesSection(self.structured_save_file.cities_section)
 
 
 
@@ -37,3 +38,17 @@ class DataStarterSection:
         self.fourth_record["start_season"] = four_to_one(starter_section[3][21:25])
         self.fourth_record["end_year"] = struct.unpack("i", starter_section[3][25:29])[0]
         self.fourth_record["end_season"] = four_to_one(starter_section[3][29:33])
+
+
+
+class DataCitiesSection:
+    def __init__(self, cities_section):
+        #Split the records up
+        city_bytestrings = cities_section.split_on_substring(b"\x0c\x00default_set")
+        self.cities = [self.process_city_bytestring(c) for c in city_bytestrings]
+
+
+    def process_city_bytestring(self, city_bytestring):
+        city = {}
+
+        return city

@@ -55,6 +55,20 @@ class BytestringContainer:
         return Counter(subbytes)
 
 
+    def split_on_substring(self, substring):
+        length = len(substring)
+        bytestrings = []
+        bytestring = bytearray()
+        for index, b in enumerate(self.bytestring[:0-length]):
+            if self.bytestring[index:index+length] == substring:
+                bytestrings.append(BytestringContainer(bytes(bytestring)))
+                bytestring = bytearray()
+            bytestring.append(b)
+        return bytestrings
+
+
+
+
     def get_byte_trend_chart(self, byte=0):
         chart = quickplots.SingleSeriesAxisChart(
          [(i, (b == byte)) for i,b in enumerate(self.bytestring, start=1)]
