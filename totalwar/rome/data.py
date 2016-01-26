@@ -44,11 +44,113 @@ class DataStarterSection:
 class DataCitiesSection:
     def __init__(self, cities_section):
         #Split the records up
-        city_bytestrings = cities_section.split_on_substring(b"\x0c\x00default_set")
-        self.cities = [self.process_city_bytestring(c) for c in city_bytestrings]
+        self.city_bytestrings = cities_section.split_on_substring(b"\x0c\x00default_set")
+        self.cities = [self.process_city_bytestring(c) for c in self.city_bytestrings[1:]]
 
 
     def process_city_bytestring(self, city_bytestring):
         city = {}
+        loc = 0
 
+        #Process INFO bytes
+        length = city_bytestring[loc]
+        city["set"] = city_bytestring[loc+2:loc+length+1]
+        loc += length + 2
+        loc += 4 #Skip record offset
+        city["city_id"] = four_to_one(city_bytestring[loc:loc+4])
+        loc += 8 #Also skip 252 252 252 252
+        city["x"] = four_to_one(city_bytestring[loc:loc+4])
+        loc += 4
+        city["y"] = four_to_one(city_bytestring[loc:loc+4])
+        loc += 4
+        city["unknown1"] = city_bytestring[loc:loc+17]
+        loc += 17
+
+        #Process CONSTRUCTION bytes
+        city["construction_num"] = four_to_one(city_bytestring[loc:loc+4])
+        loc += 4
+        city["unknown2"] = city_bytestring[loc:loc+4]
+        loc += 4
+        city["constructions"] = []
+        for _ in range(city["construction_num"]):
+            if city_bytestring[loc + 1] == 0 and city_bytestring[loc] < 20:
+                ##This construction sequence contains the name of the building
+                city["constructions"].append(city_bytestring[loc:loc+50+city_bytestring[loc]])
+                loc += (50 + city_bytestring[loc])
+            else:
+                #This construction sequence uses a building ID as identifier
+                city["constructions"].append(city_bytestring[loc:loc+52])
+                loc += 52
+
+        #Process TRAINING bytes
+        city["training_num"] = four_to_one(city_bytestring[loc:loc+4])
+        loc += 4
+        city["trainings"] = []
+        for _ in range(city["training_num"]):
+            end = city_bytestring[loc:].find(b"\xff") + 11 + loc
+            city["trainings"].append(city_bytestring[loc:end])
+            loc = end
+        city["unknown3"] = city_bytestring[loc:loc+4]
+        loc += 4
+
+        #Process BUILDINGS bytes
+        city["building_num"] = four_to_one(city_bytestring[loc:loc+4])
+        loc += 4
+        city["buildings"] = []
+        for _ in range(city["building_num"]):
+            building = {}
+            loc += 4 #Skip record offset
+            building["type_length"] = city_bytestring[loc]
+            loc += 2
+            building["type"] = city_bytestring[loc:loc+building["type_length"]-1]
+            loc += building["type_length"]
+            building["building_id"] = four_to_one(city_bytestring[loc:loc+4])
+            loc += 4
+            building["level"] = city_bytestring[loc]
+            loc += 1
+            loc += 20 #Skip \xcd x 20
+            building["culture_id"] = four_to_one(city_bytestring[loc:loc+4])
+            loc += 4
+            building["health"] = four_to_one(city_bytestring[loc:loc+4])
+            loc += 4
+            building["unknown1"] = city_bytestring[loc]
+            loc += 1
+            loc += 3 #Skip \xcd\xcd\xcd
+            building["unknown2"] = city_bytestring[loc:loc+12]
+            loc += 12
+            loc += 21 #Skip \xff * 21
+            city["buildings"].append(building)
+
+        #Process POSTF bytes
+        while city_bytestring[loc] == 255:
+            loc += 1
+        delimstart = city_bytestring[loc:].find(b'\xff' * 8)
+        city["unknown4"] = city_bytestring[loc:loc+delimstart]
+        loc += delimstart
+        while city_bytestring[loc] == 255:
+            loc += 1
+        delimstart = city_bytestring[loc:].find(b'\xcd' * 8)
+        city["unknown4"] = city_bytestring[loc:loc+delimstart]
+        loc += delimstart
+        while city_bytestring[loc] == 205:
+            loc += 1
+        city["population"] = four_to_one(city_bytestring[loc:loc+4])
+        loc += 4
+        city["happiness"] = four_to_one(city_bytestring[loc:loc+4])
+        loc += 4
+
+        #Process NAME bytes
+        loc += 4 #Skip record offset
+        city["unknown5"] = city_bytestring[loc:loc+11]
+        loc += 11
+        city["name_length"] = city_bytestring[loc]
+        loc += 2
+        city["name"] = city_bytestring[loc:loc+(city["name_length"]*2)][::2]
+        loc += city["name_length"] * 2
+
+
+
+
+
+        city["next"] = city_bytestring[loc:loc+5]
         return city

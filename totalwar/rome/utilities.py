@@ -64,6 +64,8 @@ class BytestringContainer:
                 bytestrings.append(BytestringContainer(bytes(bytestring)))
                 bytestring = bytearray()
             bytestring.append(b)
+        bytestring = bytestring + self.bytestring[0-length:]
+        bytestrings.append(bytes(bytestring))
         return bytestrings
 
 
